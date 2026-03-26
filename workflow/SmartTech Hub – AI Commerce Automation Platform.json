@@ -1,0 +1,337 @@
+{
+  "name": "SmartTech Hub AI Knowledge Assistant",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        64
+      ],
+      "id": "21f05618-fdaf-4cb1-858e-93e8bd4f6628",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1yBxSjAVi0zTvOUUo1F0KLfZYr_LCAPWb",
+          "mode": "list",
+          "cachedResultName": "SmartTech Hub – Official Knowledge Base.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1yBxSjAVi0zTvOUUo1F0KLfZYr_LCAPWb/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -64,
+        64
+      ],
+      "id": "1e19dfc4-a1e9-409e-9411-28560e402640",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "LrphJRDgcXBHkPMw",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        128,
+        64
+      ],
+      "id": "1616b12a-d92e-4f98-be6a-2b92c63cc68a",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "qJ7zX92HogzVuyL7",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        288,
+        272
+      ],
+      "id": "6eb79fe6-80f0-4ed4-aa3f-44eb1d21ee1e",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-embedding-001"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        112,
+        272
+      ],
+      "id": "adf05a2a-8391-4c60-934f-744128689126",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "PW6KSTkid1JJdsPb",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -256,
+        -336
+      ],
+      "id": "ba25b5e9-4063-486a-8684-e36137cae1b8",
+      "name": "When chat message received",
+      "webhookId": "5e0e5d38-2650-4a91-99e6-3668f5daa24a"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are SmartTech Hub’s official AI Commerce Assistant. You have access to two tools: Product Database Tool → for live product data (price, stock, SKU, specifications, availability) Knowledge Base Tool → for policies, warranty, shipping, refund, company information You MUST strictly follow the rules below. ━━━━━━━━━━━━━━━━━━━━ PRODUCT DATA RULES ━━━━━━━━━━━━━━━━━━━━ For ANY question related to: price stock availability SKU product specifications product comparison product features You MUST call the Product Database Tool. NEVER guess product price or stock. ONLY use the exact values returned by the Product Database Tool. Always display price with a dollar sign. Example format: \"The current price of SmartTech X12 Pro is $899.\" Do NOT change, estimate, round, or modify price. Stock Handling Rules: If stock = 0 → say: \"This product is currently out of stock.\" If stock > 0 → say: \"This product is currently in stock.\" If stock ≤ 5 → say: \"This product is currently in stock with limited availability.\" If Product Database Tool returns no results: Say: \"The requested product is currently unavailable. Please contact our support team for further assistance.\" Do NOT use Knowledge Base for pricing or stock. ━━━━━━━━━━━━━━━━━━━━ POLICY RULES ━━━━━━━━━━━━━━━━━━━━ Use Knowledge Base Tool only for: refund policy warranty policy shipping privacy terms & conditions Never invent policies. ━━━━━━━━━━━━━━━━━━━━ GENERAL RULES ━━━━━━━━━━━━━━━━━━━━ Never mention database, tools, embeddings, or internal systems. Never generate legal advice. Maintain professional and friendly tone. Keep responses clear and structured. If question is unrelated to SmartTech Hub, politely decline. Never say you are a Google model. Always act as SmartTech Hub assistant. If tool response conflicts with prior conversation, always trust the latest tool output. Answer clearly and directly."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -64,
+        -336
+      ],
+      "id": "d0a57875-8625-468e-8cd2-9593aa54e2e1",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use this tool to answer any questions about our e-commerce business, company information, products, policies, or company history. Always search this knowledge base before answering.",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        352,
+        -144
+      ],
+      "id": "1aef77f4-c3c8-4072-822d-0c4f8c7a6d91",
+      "name": "Supabase Vector Store1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "qJ7zX92HogzVuyL7",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "products",
+        "limit": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Limit', ``, 'number') }}",
+        "matchType": "allFilters"
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -144
+      ],
+      "id": "4576bba3-237c-4f4c-96b5-674852fcf5a1",
+      "name": "Get many rows in Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "qJ7zX92HogzVuyL7",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        -144
+      ],
+      "id": "e9b957cb-6111-4f87-90fa-832a72b7d9ac",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        -128
+      ],
+      "id": "32aa62f8-4232-4887-a801-d067d4dfe6e6",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "ihrU8V61eEAab4ig",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows in Supabase": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "4e1f4067-b704-472a-96a9-51a941e95d54",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4afab8f9e286217cf61120568c8c214f2eecb2afad454e4186dea3fbb88841f8"
+  },
+  "id": "gKi5uOez5F6Bb1L3",
+  "tags": []
+}
