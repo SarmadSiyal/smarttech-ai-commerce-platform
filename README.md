@@ -243,15 +243,122 @@ Future improvements:
 ![Database Schema](screenshots/database-schema.png)
 
 
----
+## ⚙️ Setup Guide
 
-## 🚀 Author
-
-**Sarmad Siyal**
-AI Automation Specialist | AI Agent Builder
-
-📧 [sarmadsindhi101@gmail.com](mailto:sarmadsindhi101@gmail.com)
+Follow these steps to set up and run the SmartTech Hub AI system locally:
 
 ---
 
-⭐ *Building intelligent systems that automate real-world business operations*
+### 🔧 1. Import n8n Workflow
+
+* Open your n8n instance
+* Go to **Workflows → Import**
+* Upload the provided workflow JSON file
+* Verify all nodes are correctly connected
+
+---
+
+### 🔐 2. Configure Environment Variables & Credentials
+
+#### 🗄️ Supabase Configuration
+
+* Create a project in Supabase
+* Copy:
+
+  * Project URL
+  * Anon Public Key
+* Add them in n8n credentials and frontend config
+
+---
+
+#### 🤖 AI Model (Groq API)
+
+* Get API key from Groq
+* Add API key inside n8n AI node
+* Select LLaMA model (recommended: LLaMA 3)
+
+---
+
+### 🗃️ 3. Database Setup (Supabase)
+
+Create the following tables:
+
+#### 📦 Products Table
+
+Include fields:
+`id, name, sku, category, price, stock, description, specs, status, created_at, updated_at`
+
+---
+
+#### 📚 Documents Table (Vector DB)
+
+Include fields:
+`content, embeddings, metadata`
+
+👉 Ensure product data is stored ONLY in products table
+
+---
+
+### 🔗 4. Configure Webhook
+
+* Copy webhook URL from n8n
+* Paste into chatbot frontend code
+* Ensure method is set to **POST**
+* Test endpoint using sample request
+
+---
+
+### 💬 5. Deploy Chatbot UI
+
+* Open chatbot HTML file
+* Update webhook URL
+* Host using:
+
+  * Local server (for testing)
+  * Or deploy on Vercel / Netlify
+
+---
+
+### 🧑‍💼 6. Setup Admin Dashboard
+
+* Open Admin Dashboard HTML file
+* Add:
+
+  * Supabase URL
+  * Supabase Anon Key
+* Test:
+
+  * Add product
+  * Edit product
+  * Delete product
+
+---
+
+### 🧪 7. Test the System
+
+Try sample queries:
+
+* “What is the price of [Product Name]?”
+* “Is this product in stock?”
+* “What is your return policy?”
+
+✅ Verify:
+
+* Correct database response
+* No hallucination
+* Proper formatting
+
+---
+
+### 🚀 8. Activate Workflow
+
+* Turn ON workflow in n8n
+* Ensure all nodes are active
+* Monitor executions for debugging
+
+---
+
+## ✅ System Ready
+
+Your AI Commerce Automation Platform is now fully operational 🎉
+
